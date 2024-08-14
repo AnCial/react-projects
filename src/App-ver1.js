@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const tempMovieData = [
   {
@@ -47,62 +47,21 @@ const tempWatchedData = [
   },
 ];
 
-const KEY = "5595238a";
-// const query = "star wars";
-
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
-  const [query, setQuery] = useState("");
-  const [watched, setWatched] = useState([]);
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  // const tempQuery = "star wars";
-
-  useEffect(() => {
-    async function fetchMovies() {
-      try {
-        setLoading(true);
-        setError("");
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-        );
-        console.log(res);
-        if (!res.ok) throw new Error("Network response was not ok");
-
-        const data = await res.json();
-        if (data.response === "False") throw new Error("Movie not found!");
-
-        setMovies(data.Search);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (query.length < 3) {
-      setMovies([]);
-      setError("");
-      return;
-    }
-
-    fetchMovies();
-  }, [query]);
-
+  const [watched, setWatched] = useState(tempWatchedData);
+  const [movies, setMovies] = useState(tempMovieData);
   return (
     <>
       <Navbar>
-        <Search query={query} setQuery={setQuery} />
+        <Search />
         <Numresults movies={movies} />
       </Navbar>
       <Main>
         <Box>
-          {loading && <Loader />}
-          {!loading && !error && <MovieList movies={movies} />}
-          {error && <ErrorMessage message={error} />}
+          <MovieList movies={movies} />
         </Box>
         <Box>
           <WatchedSummary watched={watched} />
@@ -110,19 +69,6 @@ export default function App() {
         </Box>
       </Main>
     </>
-  );
-}
-
-function Loader() {
-  return <p className="loader">Loading...</p>;
-}
-
-function ErrorMessage({ message }) {
-  return (
-    <p className="error">
-      <span>😣</span>
-      {message}
-    </p>
   );
 }
 
@@ -147,12 +93,13 @@ function Logo() {
 function Numresults({ movies }) {
   return (
     <p className="num-results">
-      Found <strong>{movies === undefined ? 0 : movies.length}</strong> results
+      Found <strong>{movies.length}</strong> results
     </p>
   );
 }
 
-function Search({ query, setQuery }) {
+function Search() {
+  const [query, setQuery] = useState("");
   return (
     <input
       className="search"
